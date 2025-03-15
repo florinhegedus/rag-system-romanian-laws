@@ -1,0 +1,86 @@
+services:
+  # Persistent Services
+  minio:
+    image: minio/minio
+    volumes:
+      - minio_data:/data
+    command: server /data
+    env_file: .env
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+
+  postgres:
+    image: postgres:13
+    env_file: .env
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  mlflow:
+    image: mlflow/mlflow
+    env_file: .env
+    volumes:
+      - mlflow_artifacts:/mlflow
+    ports:
+      - "5000:5000"
+
+  qdrant:
+    image: qdrant/qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+
+  inference-api:
+    build: ./components/component5
+    env_file: .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      - qdrant
+      - mlflow
+
+  react-ui:
+    build: ./components/component6/react-app/
+    ports:
+      - "3000:80"
+    depends_on:
+      - inference-api
+
+  # On-demand Services (run with docker-compose run)
+  law-scraper:
+    build: ./components/component1
+    env_file: .env
+    depends_on:
+      - minio
+
+  etl-processor:
+    build: ./components/component2
+    env_file: .env
+    depends_on:
+      - minio
+      - postgres
+
+  model-trainer:
+    build: ./components/component3
+    env_file: .env
+    depends_on:
+      - postgres
+      - mlflow
+
+  embedding-generator:
+    build: ./components/component4
+    env_file: .env
+    depends_on:
+      - postgres
+      - qdrant
+      - mlflow
+
+volumes:
+  minio_data:
+  pg_data:
+  mlflow_artifacts:
+  qdrant_data:
