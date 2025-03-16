@@ -12,4 +12,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY scraper/ .
 
 # Run the scraper
-CMD ["python", "-u", "main.py"]
+CMD ["python", "-u", "main.py"] 

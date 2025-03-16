@@ -26,6 +26,8 @@ def main():
     law_texts = [article.text for article in articles]
     law_dict = {article.contents[1].text: article.contents[3].text for article in articles}
 
+    print("Scraping terminated successfully.")
+
 
 if __name__ == '__main__':
     main()
