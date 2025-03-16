@@ -4,15 +4,14 @@ from botocore.client import Config
 from enum import Enum
 
 
-# Links to the laws
-class LawLinks(Enum):
+class LegalDocEnum(Enum):
     CODUL_PENAL = "https://legislatie.just.ro/Public/DetaliiDocument/109855"
     CODUL_DE_PROCEDURA_PENALA = "https://legislatie.just.ro/Public/DetaliiDocument/120611"
     CODUL_CIVIL = "https://legislatie.just.ro/Public/DetaliiDocument/109884"
     CODUL_DE_PROCEDURA_CIVILA = "https://legislatie.just.ro/Public/DetaliiDocument/140271"
 
-# MinIO client
-class MINIOClient:
+
+class MinIOClient:
     def __init__(self):
         """
         Initializes the MinIO client.
@@ -58,18 +57,19 @@ class MINIOClient:
         except Exception as e:
             print(f"Error uploading object: {e}")
 
-class PageLinks:
+
+class SavingUtilities:
     def __init__(self):
         """
-        Initializes the PageLinks class.
+        Initializes the SavingUtilities class.
         """
         self.links = [
-            LawLinks.CODUL_PENAL,
-            LawLinks.CODUL_DE_PROCEDURA_PENALA,
-            LawLinks.CODUL_CIVIL,
-            LawLinks.CODUL_DE_PROCEDURA_CIVILA
+            LegalDocEnum.CODUL_PENAL,
+            LegalDocEnum.CODUL_DE_PROCEDURA_PENALA,
+            LegalDocEnum.CODUL_CIVIL,
+            LegalDocEnum.CODUL_DE_PROCEDURA_CIVILA
         ]
-        self.minio_client = MINIOClient()
+        self.minio_client = MinIOClient()
         self.bucket_name = "legal-docs-minio-bucket"
     
     def save_page_content(self, link, filename):
@@ -79,17 +79,19 @@ class PageLinks:
         page = requests.get(link)
 
         self.minio_client.create_bucket_if_not_exists(self.bucket_name)
-        # Save content to MinIO
         self.minio_client.put_object(
             self.bucket_name, filename, page.content, len(page.content), content_type="text/html"
         )
 
+
 def main():
-    # Save content to MinIO
-    page_links = PageLinks()
-    for link in page_links.links:
-        page_links.save_page_content(link.value, f"{link.name}.html")
-    page_links.minio_client.client.list_buckets()
+    """
+    Main function that collects data.
+    """
+    doc_saver = SavingUtilities()
+    for link in doc_saver.links:
+        doc_saver.save_page_content(link.value, f"{link.name}.html")
+    doc_saver.minio_client.client.list_buckets()
 
     print("Data collection completed.")
 
