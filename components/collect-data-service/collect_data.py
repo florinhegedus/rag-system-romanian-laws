@@ -95,5 +95,6 @@ def main():
 
     print("Data collection completed.")
 
+
 if __name__ == '__main__':
     main()
