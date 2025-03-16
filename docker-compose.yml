@@ -34,8 +34,8 @@ services:
     volumes:
       - qdrant_data:/qdrant/storage
 
-  inference-api:
-    build: ./components/component5
+  backend:
+    build: ./components/backend-service
     env_file: .env
     ports:
       - "8000:8000"
@@ -43,35 +43,35 @@ services:
       - qdrant
       - mlflow
 
-  react-ui:
-    build: ./components/component6/react-app/
+  frontend-app:
+    build: ./components/frontend-app
     ports:
       - "3000:80"
     depends_on:
-      - inference-api
+      - backend
 
   # On-demand Services (run with docker-compose run)
-  law-scraper:
-    build: ./components/component1
+  collect-data:
+    build: ./components/collect-data-service
     env_file: .env
     depends_on:
       - minio
 
-  etl-processor:
+  etl:
     build: ./components/component2
     env_file: .env
     depends_on:
       - minio
       - postgres
 
-  model-trainer:
+  model-training:
     build: ./components/component3
     env_file: .env
     depends_on:
       - postgres
       - mlflow
 
-  embedding-generator:
+  embeddings-generation:
     build: ./components/component4
     env_file: .env
     depends_on:
