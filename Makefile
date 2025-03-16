@@ -9,10 +9,23 @@ help:
 	@grep -E '^[a-zA-Z0-9 -]+:.*#'  Makefile | sort | while read -r l; do printf "\033[1;32m$$(echo $$l | cut -f 1 -d':')\033[00m:$$(echo $$l | cut -f 2- -d'#')\n"; done
 
 
-# --- Infrastructure --- 
+# --- On-demand Services --- 
 collect-data:  # Collect raw legal data from online sources
 	docker-compose build collect-data
 	docker-compose run --rm collect-data
 
+etl:  # Extract, transform and load data into the database
+	docker-compose build etl
+	docker-compose run --rm etl
+
+train-model:  # Train the model
+	docker-compose build train-model
+	docker-compose run --rm train-model
+
+generate-embeddings:  # Generate embeddings for legal documents
+	docker-compose build embeddings-generation
+	docker-compose run --rm embeddings-generation
+	
+# --- Infrastructure ---
 local-docker-stop-containers:  # Stop all running containers
 	docker compose stop

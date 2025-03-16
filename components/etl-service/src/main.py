@@ -2,9 +2,6 @@ import requests
 from bs4 import BeautifulSoup
 
 
-CODUL_PENAL_LINK = "https://legislatie.just.ro/Public/DetaliiDocument/109855"
-
-
 def main():
     page = requests.get(CODUL_PENAL_LINK)
 

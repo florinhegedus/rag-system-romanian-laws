@@ -5,11 +5,11 @@ ENV PYTHONUNBUFFERED=1
 
 # Install dependencies
 WORKDIR /app
-COPY src/requirements.txt .
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy scraper code
-COPY src/ .
+# Copy collect data code
+COPY collect_data.py .
 
-# Run the scraper
-CMD ["python", "-u", "main.py"] 
+# Run the data collection service
+CMD ["python", "-u", "collect_data.py"] 
