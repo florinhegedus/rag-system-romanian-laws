@@ -3,10 +3,10 @@ name: Docker Compose Build and Test
 on:
   push:
     branches:
-      - main  # Trigger on commits to the main branch
+      - master  # Trigger on commits to the master branch
   pull_request:
     branches:
-      - main  # Trigger on pull requests to the main branch
+      - master  # Trigger on pull requests to the master branch
 
 jobs:
   build-and-test:
