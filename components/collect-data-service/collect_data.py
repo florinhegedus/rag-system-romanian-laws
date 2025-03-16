@@ -1,7 +1,13 @@
+import os
 import requests
 import boto3
 from botocore.client import Config
 from enum import Enum
+from dotenv import load_dotenv
+
+
+# Load environment variables from .env file
+load_dotenv()
 
 
 class LegalDocEnum(Enum):
@@ -19,8 +25,8 @@ class MinIOClient:
         self.client = boto3.client(
             's3',
             endpoint_url='http://minio:9000',
-            aws_access_key_id='minioadmin',
-            aws_secret_access_key='minioadmin',
+            aws_access_key_id=os.getenv("MINIO_ROOT_USER"),
+            aws_secret_access_key=os.getenv("MINIO_ROOT_PASSWORD"),
             config=Config(signature_version="s3v4")
         )
 

@@ -6,16 +6,13 @@ services:
     ports:
       - "9000:9000"
       - "9001:9001"
-    environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
+    env_file: .env
     volumes:
       - minio_data:/data
     command: server /data --console-address ":9001"
 
   postgres:
     image: postgres:13
-    env_file: .env
     volumes:
       - pg_data:/var/lib/postgresql/data
     ports:
