@@ -15,6 +15,9 @@ class LegalDocEnum(Enum):
     CODUL_DE_PROCEDURA_PENALA = "https://legislatie.just.ro/Public/DetaliiDocument/120611"
     CODUL_CIVIL = "https://legislatie.just.ro/Public/DetaliiDocument/109884"
     CODUL_DE_PROCEDURA_CIVILA = "https://legislatie.just.ro/Public/DetaliiDocument/140271"
+    CODUL_FISCAL = "https://legislatie.just.ro/Public/DetaliiDocument/171282"
+    CODUL_DE_PROCEDURA_FISCALA = "https://legislatie.just.ro/Public/DetaliiDocument/172697"
+    CODUL_MUNCII = "https://legislatie.just.ro/Public/DetaliiDocument/128647"
 
 
 class MinIOClient:
@@ -73,7 +76,10 @@ class SavingUtilities:
             LegalDocEnum.CODUL_PENAL,
             LegalDocEnum.CODUL_DE_PROCEDURA_PENALA,
             LegalDocEnum.CODUL_CIVIL,
-            LegalDocEnum.CODUL_DE_PROCEDURA_CIVILA
+            LegalDocEnum.CODUL_DE_PROCEDURA_CIVILA,
+            LegalDocEnum.CODUL_FISCAL,
+            LegalDocEnum.CODUL_DE_PROCEDURA_FISCALA,
+            LegalDocEnum.CODUL_MUNCII
         ]
         self.minio_client = MinIOClient()
         self.bucket_name = "legal-docs-minio-bucket"
