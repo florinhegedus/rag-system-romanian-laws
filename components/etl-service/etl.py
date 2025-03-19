@@ -1,9 +1,31 @@
 import requests
 from bs4 import BeautifulSoup
-
+from sqlalchemy import create_engine, Column, String, Text, Integer
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 
 CODUL_PENAL_LINK = "https://legislatie.just.ro/Public/DetaliiDocument/109855"
 
+# Define the Article class for ORM
+Base = declarative_base()
+
+class Article(Base):
+    __tablename__ = 'articles'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    article_id = Column(String, unique=True, nullable=False)
+    article_title = Column(String, nullable=False)
+    article_body = Column(Text, nullable=False)
+    part = Column(String)
+    title = Column(String)
+    chapter = Column(String)
+    section = Column(String)
+
+# Set up the database connection
+DATABASE_URL = "postgresql+psycopg2://yourusername:yourpassword@localhost:5432/yourdatabase"
+engine = create_engine(DATABASE_URL)
+Base.metadata.create_all(engine)
+Session = sessionmaker(bind=engine)
+session = Session()
 
 def main():
     page = requests.get(CODUL_PENAL_LINK)
@@ -20,11 +42,6 @@ def main():
     
     # Extract all S_ART tags
     articles = soup.find_all('span', attrs={'class': 'S_ART'})
-
-    # Dictionary to store extracted texts
-    article_texts = {}
-    law_texts = [article.text for article in articles]
-    law_dict = {article.contents[1].text: article.contents[3].text for article in articles}
 
     # Iterate over each article and get ('Part', 'Title', 'Chapter', 'Section')
     look_for = ['S_PRT_TTL', 'S_PRT_DEN', 'S_TTL_TTL', 'S_TTL_DEN', 'S_CAP_TTL', 'S_CAP_DEN', 'S_SEC_TTL', 'S_SEC_DEN']
@@ -53,13 +70,21 @@ def main():
                 if part and title and chapter and section:
                     break
 
-        print(f"{part} - {title} - {chapter} - {section} - {article_id}")
-        print(f"Article Title: {article_title}")
-        print(f"Article Body: {article_body}")
-        print("------------------------------------------------")
+        # Create an Article object and add it to the session
+        new_article = Article(
+            article_id=article_id,
+            article_title=article_title,
+            article_body=article_body,
+            part=part,
+            title=title,
+            chapter=chapter,
+            section=section
+        )
+        session.add(new_article)
 
-    print("Scraping terminated successfully.")
-
+    # Commit the session to save the articles to the database
+    session.commit()
+    print("Scraping and saving to database terminated successfully.")
 
 if __name__ == '__main__':
     main()

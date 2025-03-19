@@ -29,3 +29,6 @@ generate-embeddings:  # Generate embeddings for legal documents
 # --- Infrastructure ---
 local-docker-stop-containers:  # Stop all running containers
 	docker compose stop
+
+start-postgres-db:  # Start the Postgres database
+	docker-compose up -d postgres
