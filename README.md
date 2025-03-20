@@ -1,4 +1,11 @@
 # Romanian Laws Rag
+
+This repository contains a system for collecting, processing, and querying Romanian laws. The system includes various components for data collection, ETL (Extract, Transform, Load) processes, and a backend service for querying the processed data. The architecture is designed to be modular and scalable, leveraging Docker for containerization and PostgreSQL for data storage.
+
+![Architecture](static/rolaw.jpg)
+
+
+## Local Deployment
 1. Start persistent services:
 ```bash
 docker-compose up -d minio postgres #  mlflow qdrant inference-api react-ui
