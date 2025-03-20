@@ -62,7 +62,7 @@ services:
       - minio
 
   etl:
-    build: ./components/component2
+    build: ./components/etl-service
     env_file: .env
     depends_on:
       - minio

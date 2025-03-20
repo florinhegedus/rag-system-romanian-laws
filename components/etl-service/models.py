@@ -3,7 +3,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 # Define the database URL (replace with your actual database credentials)
-DATABASE_URL = "postgresql+psycopg2://yourusername:yourpassword@localhost:5432/yourdatabase"
+DATABASE_URL = "postgresql+psycopg2://yourusername:yourpassword@postgres:5432/yourdatabase"
 
 # Create the database engine
 engine = create_engine(DATABASE_URL)

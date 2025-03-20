@@ -5,11 +5,12 @@ ENV PYTHONUNBUFFERED=1
 
 # Install dependencies
 WORKDIR /app
-COPY src/requirements.txt .
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy ETL code
-COPY src/ .
+COPY etl.py .
+COPY models.py .
 
 # Run the ETL pipeline
-CMD ["python", "-u", "main.py"]
+CMD ["python", "-u", "etl.py"]

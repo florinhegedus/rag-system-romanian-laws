@@ -1,32 +1,73 @@
-import requests
+import os
 from bs4 import BeautifulSoup
 from models import Article, Session
 from enum import Enum
+from dotenv import load_dotenv
+import boto3
+from botocore.client import Config
+
+# Load environment variables from .env file
+load_dotenv()
 
 
 class LegalDocEnum(Enum):
-    CODUL_PENAL = "https://legislatie.just.ro/Public/DetaliiDocument/109855"
-    CODUL_DE_PROCEDURA_PENALA = "https://legislatie.just.ro/Public/DetaliiDocument/120611"
-    CODUL_CIVIL = "https://legislatie.just.ro/Public/DetaliiDocument/109884"
-    CODUL_DE_PROCEDURA_CIVILA = "https://legislatie.just.ro/Public/DetaliiDocument/140271"
-    CODUL_FISCAL = "https://legislatie.just.ro/Public/DetaliiDocument/171282"
-    CODUL_DE_PROCEDURA_FISCALA = "https://legislatie.just.ro/Public/DetaliiDocument/172697"
-    CODUL_MUNCII = "https://legislatie.just.ro/Public/DetaliiDocument/128647"
+    CODUL_PENAL = "CODUL_PENAL"
+    CODUL_DE_PROCEDURA_PENALA = "CODUL_DE_PROCEDURA_PENALA"
+    CODUL_CIVIL = "CODUL_CIVIL"
+    CODUL_DE_PROCEDURA_CIVILA = "CODUL_DE_PROCEDURA_CIVILA"
+    CODUL_FISCAL = "CODUL_FISCAL"
+    CODUL_DE_PROCEDURA_FISCALA = "CODUL_DE_PROCEDURA_FISCALA"
+    CODUL_MUNCII = "CODUL_MUNCII"
 
 
-def save_legal_doc_to_postgres(document_name, document_url):
-    page = requests.get(document_url)
+class MinIOClient:
+    def __init__(self):
+        """
+        Initializes the MinIO client.
+        """
+        self.client = boto3.client(
+            's3',
+            endpoint_url='http://minio:9000',
+            aws_access_key_id=os.getenv("MINIO_ROOT_USER"),
+            aws_secret_access_key=os.getenv("MINIO_ROOT_PASSWORD"),
+            config=Config(signature_version="s3v4")
+        )
 
-    # Save content to file
-    with open(f'{document_name}.html', 'wb+') as f:
-        f.write(page.content)
-    
-    with open(f'{document_name}.html', 'r', encoding='utf-8') as file:
-        content = file.read()
+    def get_object(self, bucket_name, object_name):
+        """
+        Retrieves an object from a bucket.
+
+        :param bucket_name: Name of the bucket.
+        :param object_name: Name of the object (key) in the bucket.
+        :return: The content of the object as bytes.
+        """
+        try:
+            response = self.client.get_object(Bucket=bucket_name, Key=object_name)
+            return response['Body'].read()
+        except Exception as e:
+            print(f"Error retrieving object '{object_name}' from bucket '{bucket_name}': {e}")
+            return None
+
+
+def save_legal_doc_to_postgres(document_name, minio_client, bucket_name):
+    """
+    Fetches the legal document from MinIO, parses it, and saves the articles to PostgreSQL.
+
+    :param document_name: Name of the document (e.g., "CODUL_PENAL").
+    :param minio_client: An instance of the MinIOClient class.
+    :param bucket_name: Name of the MinIO bucket where the document is stored.
+    """
+    # Fetch the HTML content from MinIO
+    object_name = f"{document_name}.html"
+    content = minio_client.get_object(bucket_name, object_name)
+
+    if not content:
+        print(f"Failed to retrieve {object_name} from MinIO.")
+        return
 
     # Parse the HTML content
     soup = BeautifulSoup(content, 'lxml')
-    
+
     # Extract all S_ART tags
     articles = soup.find_all('span', attrs={'class': 'S_ART'})
 
@@ -93,9 +134,16 @@ def save_legal_doc_to_postgres(document_name, document_url):
     finally:
         session.close()
 
+
 def main():
+    # Initialize MinIO client
+    minio_client = MinIOClient()
+    bucket_name = "legal-docs-minio-bucket"
+
+    # Process each legal document
     for doc in LegalDocEnum:
-        save_legal_doc_to_postgres(doc.name, doc.value)
+        save_legal_doc_to_postgres(doc.value, minio_client, bucket_name)
+
 
 if __name__ == '__main__':
     main()
