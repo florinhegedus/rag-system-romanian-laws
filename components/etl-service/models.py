@@ -1,4 +1,3 @@
-# models.py
 from sqlalchemy import create_engine, Column, String, Text, Integer, UniqueConstraint
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
@@ -19,7 +18,8 @@ Base = declarative_base()
 class Article(Base):
     __tablename__ = 'articles'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    article_id = Column(String, unique=True, nullable=False)
+    source = Column(String, nullable=False)
+    article_id = Column(String, nullable=False)
     article_title = Column(String, nullable=False)
     article_body = Column(Text, nullable=False)
     part = Column(String)
@@ -27,7 +27,7 @@ class Article(Base):
     chapter = Column(String)
     section = Column(String)
 
-    __table_args__ = (UniqueConstraint('article_id', name='_article_id_uc'),)
+    __table_args__ = (UniqueConstraint('source', 'article_id', name='_source_article_id_uc'),)
 
 # Create all tables in the database (if they don't already exist)
 Base.metadata.create_all(engine)

@@ -1,4 +1,4 @@
-# Romanian Laws Rag
+# Romanian Laws RAG
 
 This repository contains a system for collecting, processing, and querying Romanian laws. The system includes various components for data collection, ETL (Extract, Transform, Load) processes, and a backend service for querying the processed data. The architecture is designed to be modular and scalable, leveraging Docker for containerization and PostgreSQL for data storage.
 
@@ -10,7 +10,7 @@ This repository contains a system for collecting, processing, and querying Roman
 ```bash
 docker-compose up -d minio postgres #  mlflow qdrant inference-api react-ui
 ```
-2. Run on-demand components when needed:
+2. Run on-demand components:
 ```bash
 make collect-data  # Collect data to MinIO bucket
 make etl  # Run ETL
@@ -26,10 +26,8 @@ psql -h localhost -p 5432 -U yourusername -d yourdatabase
 ```sql
 -- List all tables
 \dt
-
 -- Describe the articles table
 \d articles
-
 -- Select all data from the articles table
 SELECT * FROM articles;
 ```

@@ -36,5 +36,6 @@ docker-stop-and-remove-containers:  # Stop and remove all running containers
 start-postgres-db:  # Start the Postgres database
 	docker-compose up -d postgres
 
-stop-and-remove-postgres-db:  # Stop and remove the Postgres database
+stop-and-remove-postgres-db:  # Stop and remove the Postgres container and its data
 	docker-compose rm -s -v postgres
+	docker volume rm rag-system-romanian-laws_pg_data
