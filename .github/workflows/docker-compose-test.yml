@@ -34,3 +34,10 @@ jobs:
       # Run the collect-data service and test it
       - name: Test collect-data service
         run: docker-compose run --rm collect-data
+
+      # Build the etl-service
+      - name: Build etl-service
+        run: docker-compose build etl-service
+
+      # Run the etl-service and test it
+        run: docker-compose run --rm etl-service
