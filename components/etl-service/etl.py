@@ -1,31 +1,9 @@
+# scrape_articles.py
 import requests
 from bs4 import BeautifulSoup
-from sqlalchemy import create_engine, Column, String, Text, Integer
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from models import Article, Session
 
 CODUL_PENAL_LINK = "https://legislatie.just.ro/Public/DetaliiDocument/109855"
-
-# Define the Article class for ORM
-Base = declarative_base()
-
-class Article(Base):
-    __tablename__ = 'articles'
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    article_id = Column(String, unique=True, nullable=False)
-    article_title = Column(String, nullable=False)
-    article_body = Column(Text, nullable=False)
-    part = Column(String)
-    title = Column(String)
-    chapter = Column(String)
-    section = Column(String)
-
-# Set up the database connection
-DATABASE_URL = "postgresql+psycopg2://yourusername:yourpassword@localhost:5432/yourdatabase"
-engine = create_engine(DATABASE_URL)
-Base.metadata.create_all(engine)
-Session = sessionmaker(bind=engine)
-session = Session()
 
 def main():
     page = requests.get(CODUL_PENAL_LINK)
@@ -45,46 +23,64 @@ def main():
 
     # Iterate over each article and get ('Part', 'Title', 'Chapter', 'Section')
     look_for = ['S_PRT_TTL', 'S_PRT_DEN', 'S_TTL_TTL', 'S_TTL_DEN', 'S_CAP_TTL', 'S_CAP_DEN', 'S_SEC_TTL', 'S_SEC_DEN']
-    for article in articles:
-        article_id = article.attrs['id']
-        article_title = article.contents[1].text
-        article_body = article.contents[3].text
-        part = None
-        title = None
-        chapter = None
-        section = None
+    session = Session()
+    try:
+        for article in articles:
+            article_id = article.attrs['id']
+            article_title = article.contents[1].text
+            article_body = article.contents[3].text
+            part = None
+            title = None
+            chapter = None
+            section = None
 
-        # Traverse parents to find chapter and section
-        for parent in article.parents:
-            # Check parent and siblings of the parent
-            for sibling in parent.self_and_previous_siblings:
-                if sibling.name == 'span' and 'class' in sibling.attrs and sibling.attrs['class'][0] in look_for:
-                    if 'S_PRT_TTL' in sibling.attrs['class']:
-                        part = sibling.text.strip()
-                    if 'S_TTL_TTL' in sibling.attrs['class']:
-                        title = sibling.text.strip()
-                    if 'S_CAP_TTL' in sibling.attrs['class']:
-                        chapter = sibling.text.strip()
-                    elif 'S_SEC_TTL' in sibling.attrs['class']:
-                        section = sibling.text.strip()
-                if part and title and chapter and section:
-                    break
+            # Traverse parents to find chapter and section
+            for parent in article.parents:
+                # Check parent and siblings of the parent
+                for sibling in parent.self_and_previous_siblings:
+                    if sibling.name == 'span' and 'class' in sibling.attrs and sibling.attrs['class'][0] in look_for:
+                        if 'S_PRT_TTL' in sibling.attrs['class']:
+                            part = sibling.text.strip()
+                        if 'S_TTL_TTL' in sibling.attrs['class']:
+                            title = sibling.text.strip()
+                        if 'S_CAP_TTL' in sibling.attrs['class']:
+                            chapter = sibling.text.strip()
+                        elif 'S_SEC_TTL' in sibling.attrs['class']:
+                            section = sibling.text.strip()
+                    if part and title and chapter and section:
+                        break
 
-        # Create an Article object and add it to the session
-        new_article = Article(
-            article_id=article_id,
-            article_title=article_title,
-            article_body=article_body,
-            part=part,
-            title=title,
-            chapter=chapter,
-            section=section
-        )
-        session.add(new_article)
+            # Create an Article object
+            new_article = Article(
+                article_id=article_id,
+                article_title=article_title,
+                article_body=article_body,
+                part=part,
+                title=title,
+                chapter=chapter,
+                section=section
+            )
 
-    # Commit the session to save the articles to the database
-    session.commit()
-    print("Scraping and saving to database terminated successfully.")
+            # Check if the article already exists
+            existing_article = session.query(Article).filter_by(article_id=article_id).first()
+            if existing_article:
+                print(f"Article with ID {article_id} already exists. Updating the article...")
+                # Update the existing article
+                existing_article.article_title = article_title
+                existing_article.article_body = article_body
+                existing_article.part = part
+                existing_article.title = title
+                existing_article.chapter = chapter
+                existing_article.section = section
+            else:
+                # Add the new article to the session
+                session.add(new_article)
+
+        # Commit the session to save the articles to the database
+        session.commit()
+        print("Scraping and saving to database terminated successfully.")
+    finally:
+        session.close()
 
 if __name__ == '__main__':
     main()

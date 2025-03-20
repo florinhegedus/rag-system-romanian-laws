@@ -27,8 +27,14 @@ generate-embeddings:  # Generate embeddings for legal documents
 	docker-compose run --rm embeddings-generation
 	
 # --- Infrastructure ---
-local-docker-stop-containers:  # Stop all running containers
+docker-stop-containers:  # Stop all running containers
 	docker compose stop
+
+docker-stop-and-remove-containers:  # Stop and remove all running containers
+	docker compose down
 
 start-postgres-db:  # Start the Postgres database
 	docker-compose up -d postgres
+
+stop-and-remove-postgres-db:  # Stop and remove the Postgres database
+	docker-compose rm -s -v postgres

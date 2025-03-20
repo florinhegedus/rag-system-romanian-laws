@@ -2,3 +2,4 @@
 minio_data/
 .venv/*
 .vscode/*
+*.pyc
