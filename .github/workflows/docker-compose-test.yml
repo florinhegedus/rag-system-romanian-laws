@@ -40,4 +40,5 @@ jobs:
         run: docker-compose build etl-service
 
       # Run the etl-service and test it
+      - name: Test etl-service
         run: docker-compose run --rm etl-service
