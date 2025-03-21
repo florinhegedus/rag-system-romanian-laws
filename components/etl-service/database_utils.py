@@ -1,4 +1,5 @@
-from models import Article, Session
+from common.postgres_db import Session, Article
+
 
 def get_article_by_id(source, article_id):
     """
@@ -16,6 +17,7 @@ def get_article_by_id(source, article_id):
         return session.query(Article).filter_by(source=source, article_id=article_id).first()
     finally:
         session.close()
+
 
 def get_all_articles(source=None):
     """
@@ -36,6 +38,7 @@ def get_all_articles(source=None):
     finally:
         session.close()
 
+
 def print_article_details(article):
     """
     Print the details of an article.
@@ -55,6 +58,7 @@ def print_article_details(article):
         print("-" * 40)
     else:
         print("Article not found.")
+
 
 def main():
     # Example usage of the utility functions

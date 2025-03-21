@@ -6,6 +6,12 @@ from dotenv import load_dotenv
 
 # Load environment variables from .env file
 load_dotenv()
+ 
+# Set the endpoint URL based on the environment
+if os.getenv("ENVIRONMENT") == "local":
+    ENDPOINT_URL = 'http://localhost:9000'
+else:
+    ENDPOINT_URL = 'http://minio:9000'
 
 
 class MinIOClient:
@@ -15,7 +21,7 @@ class MinIOClient:
         """
         self.client = boto3.client(
             's3',
-            endpoint_url='http://minio:9000',
+            endpoint_url=ENDPOINT_URL,
             aws_access_key_id=os.getenv("MINIO_ROOT_USER"),
             aws_secret_access_key=os.getenv("MINIO_ROOT_PASSWORD"),
             config=Config(signature_version="s3v4")
