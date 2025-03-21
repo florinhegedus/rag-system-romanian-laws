@@ -1,52 +1,6 @@
-import os
 from bs4 import BeautifulSoup
-from models import Article, Session
-from enum import Enum
-from dotenv import load_dotenv
-import boto3
-from botocore.client import Config
-
-# Load environment variables from .env file
-load_dotenv()
-
-
-class LegalDocEnum(Enum):
-    CODUL_PENAL = "CODUL_PENAL"
-    CODUL_DE_PROCEDURA_PENALA = "CODUL_DE_PROCEDURA_PENALA"
-    CODUL_CIVIL = "CODUL_CIVIL"
-    CODUL_DE_PROCEDURA_CIVILA = "CODUL_DE_PROCEDURA_CIVILA"
-    CODUL_FISCAL = "CODUL_FISCAL"
-    CODUL_DE_PROCEDURA_FISCALA = "CODUL_DE_PROCEDURA_FISCALA"
-    CODUL_MUNCII = "CODUL_MUNCII"
-
-
-class MinIOClient:
-    def __init__(self):
-        """
-        Initializes the MinIO client.
-        """
-        self.client = boto3.client(
-            's3',
-            endpoint_url='http://minio:9000',
-            aws_access_key_id=os.getenv("MINIO_ROOT_USER"),
-            aws_secret_access_key=os.getenv("MINIO_ROOT_PASSWORD"),
-            config=Config(signature_version="s3v4")
-        )
-
-    def get_object(self, bucket_name, object_name):
-        """
-        Retrieves an object from a bucket.
-
-        :param bucket_name: Name of the bucket.
-        :param object_name: Name of the object (key) in the bucket.
-        :return: The content of the object as bytes.
-        """
-        try:
-            response = self.client.get_object(Bucket=bucket_name, Key=object_name)
-            return response['Body'].read()
-        except Exception as e:
-            print(f"Error retrieving object '{object_name}' from bucket '{bucket_name}': {e}")
-            return None
+from common import MinIOClient, LegalDocEnum
+from common.postgres_db import Session, Article
 
 
 def save_legal_doc_to_postgres(document_name, minio_client, bucket_name):
@@ -142,7 +96,7 @@ def main():
 
     # Process each legal document
     for doc in LegalDocEnum:
-        save_legal_doc_to_postgres(doc.value, minio_client, bucket_name)
+        save_legal_doc_to_postgres(doc.name, minio_client, bucket_name)
 
 
 if __name__ == '__main__':

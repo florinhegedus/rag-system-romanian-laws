@@ -8,7 +8,7 @@ This repository contains a system for collecting, processing, and querying Roman
 ## Local Deployment
 1. Start persistent services:
 ```bash
-docker-compose up -d minio postgres #  mlflow qdrant inference-api react-ui
+make start-persistent-services  # minio, postgres
 ```
 2. Run on-demand components:
 ```bash
