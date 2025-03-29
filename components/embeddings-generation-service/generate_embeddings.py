@@ -1,4 +1,4 @@
-# from common.postgres_db import Session, Article
+from common.postgres_db import Session, Article
 from sentence_transformers import SentenceTransformer
 
 
@@ -13,7 +13,7 @@ def get_embeddings(model, text):
         list: A list of embeddings corresponding to the input sentences.
     """
     tokenizer = model.tokenizer
-    sentences = text.split('. ')
+    sentences = text.split('.')
 
     chunks = [[]]
     chunk_length = 0
@@ -25,6 +25,7 @@ def get_embeddings(model, text):
             print(f"Number of tokens ({num_tokens}) exceeds the maximum sequence length ({model.max_seq_length}).")
             words = sentence.split(' ')
             # TODO: append to curr_chunk and remaining to next chunks
+            raise ValueError(f"Sentence exceeds max length: {sentence}")
         elif chunk_length + num_tokens + 2 < model.max_seq_length:
             chunks[-1].append(sentence)
             chunk_length += num_tokens
@@ -32,7 +33,7 @@ def get_embeddings(model, text):
             chunks.append([sentence])
             chunk_length = num_tokens
 
-    chunks = ['. '.join(chunk) for chunk in chunks]
+    chunks = ['.'.join(chunk) for chunk in chunks]
     print(f"Number of chunks: {len(chunks)}")
 
     tokens = tokenizer(chunks, padding='longest', return_tensors="pt")
@@ -83,16 +84,17 @@ def print_article_details(article):
 
 
 def main():
-    # Example usage of the utility functions
-    # print("Fetching all articles...")
-    # all_articles = get_all_articles()
-    # for article in all_articles:
-    #     print_article_details(article)
-
+    # Example usage of sentence transformer
     model = SentenceTransformer('BlackKakapo/stsb-xlm-r-multilingual-ro')
     text = "This is an example sentence. This is another example sentence."
     embeddings = get_embeddings(model, text)
-    print(embeddings.shape)
+    print(embeddings['input_ids'][0].shape)
+
+    print("Fetching all articles...")
+    all_articles = get_all_articles()
+    for article in all_articles:
+        embeddings = get_embeddings(model, article.article_body)
+        print(embeddings['input_ids'][0].shape)
 
     # Get tokenizer
 
