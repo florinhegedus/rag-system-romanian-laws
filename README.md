@@ -13,7 +13,7 @@ make start-persistent-services  # minio, postgres
 2. Run on-demand components:
 ```bash
 make collect-data  # Collect data to MinIO bucket
-make etl  # Run ETL
+make etl  # Save legal articles to Postgres
 ```
 
 Clear all data:
