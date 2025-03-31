@@ -34,7 +34,7 @@ docker-stop-and-remove-containers:  # Stop and remove all running containers
 	docker compose down
 
 start-persistent-services:  # Start the Minio and Postgres services
-	docker-compose up -d minio postgres
+	docker-compose up -d minio postgres qdrant
 
 stop-and-remove-postgres-db:  # Stop and remove the Postgres container and its data
 	docker-compose rm -s -v postgres

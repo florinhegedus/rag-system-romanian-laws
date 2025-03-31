@@ -1,36 +1,58 @@
-from common.postgres_db import Session, Article
+import os
+import uuid
 from sentence_transformers import SentenceTransformer
+from qdrant_client import QdrantClient
+from qdrant_client.http import models
+from typing import List, Dict
+from common.postgres_db import Session, Article
 
 
-def get_embeddings(model, text, overlap_ratio=0.25):
-    """
-    Generate embeddings with sliding window and overlap
+# Initialize Qdrant client
+QDRANT_HOST = "localhost" if os.getenv("ENVIRONMENT") == "local" else "qdrant"
+qdrant_client = QdrantClient(host=QDRANT_HOST, port=6333)
+
+# Create collection (run once)
+COLLECTION_NAME = "romanian_laws"
+EMBEDDING_DIM = 768  # Verify your model's output dimension
+
+try:
+    qdrant_client.get_collection(COLLECTION_NAME)
+except Exception:
+    qdrant_client.recreate_collection(
+        collection_name=COLLECTION_NAME,
+        vectors_config=models.VectorParams(
+            size=EMBEDDING_DIM,
+            distance=models.Distance.COSINE
+        )
+    )
+
+
+def store_embeddings_qdrant(article: Article, embeddings: List, chunks: List[str]):
+    """Store embeddings in Qdrant with article metadata"""
+    points = []
     
-    Args:
-        model: SentenceTransformer model
-        text: Input text to process
-        overlap_ratio: How much to overlap the windows (e.g., 0.25 for 25% overlap)
+    for idx, (embedding, chunk) in enumerate(zip(embeddings, chunks)):
+        points.append(
+            models.PointStruct(
+                id=str(uuid.uuid4()),
+                vector=embedding.tolist(),
+                payload={
+                    "article_id": article.id,
+                    "source": article.source,
+                    "law_id": article.article_id,
+                    "chunk_index": idx,
+                    "chunk_text": chunk,
+                    "title": article.article_title,
+                    "section": article.section,
+                    "chapter": article.chapter
+                }
+            )
+        )
     
-    Returns:
-        List of embeddings for each window
-    """
-    tokenizer = model.tokenizer
-    tokens = tokenizer.encode(text, add_special_tokens=False)
-    context_size = model.max_seq_length
-    effective_window = context_size - tokenizer.num_special_tokens_to_add()
-    overlap = int(context_size * overlap_ratio)
-    step = effective_window - overlap
-    
-    chunks = []
-    for start in range(0, len(tokens), step):
-        end = start + effective_window
-        chunk_tokens = tokens[start:end]
-        
-        # Convert back to text (properly handles BPE/subword tokens)
-        chunk_text = tokenizer.decode(chunk_tokens, clean_up_tokenization_spaces=True)
-        chunks.append(chunk_text)
-    
-    return model.encode(chunks)
+    qdrant_client.upsert(
+        collection_name=COLLECTION_NAME,
+        points=points
+    )
 
 
 def get_all_articles(source=None):
@@ -53,35 +75,72 @@ def get_all_articles(source=None):
         session.close()
 
 
-def print_article_details(article):
-    """
-    Print the details of an article.
+def get_chunks(model, text: str, overlap_ratio=0.25) -> List[str]:
+    """Return text chunks for embedding"""
+    tokenizer = model.tokenizer
+    tokens = tokenizer.encode(text, add_special_tokens=False)
+    context_size = model.max_seq_length
+    effective_window = context_size - tokenizer.num_special_tokens_to_add()
+    overlap = int(effective_window * overlap_ratio)
+    step = effective_window - overlap
     
-    Args:
-        article (Article): The article object to print.
-    """
-    if article:
-        print(f"Source: {article.source}")
-        print(f"Article ID: {article.article_id}")
-        print(f"Title: {article.article_title}")
-        print(f"Body: {article.article_body}")
-        print(f"Part: {article.part}")
-        print(f"Title (Group): {article.title}")
-        print(f"Chapter: {article.chapter}")
-        print(f"Section: {article.section}")
-        print("-" * 40)
-    else:
-        print("Article not found.")
+    chunks = []
+    for start in range(0, len(tokens), step):
+        end = start + effective_window
+        chunk_tokens = tokens[start:end]
+        chunks.append(tokenizer.decode(chunk_tokens, clean_up_tokenization_spaces=True))
+    
+    return chunks
+
+
+def search_laws(query: str, model, top_k=5) -> List[Dict]:
+    """Search laws using semantic similarity"""
+    # Generate query embedding
+    query_embedding = model.encode(query).tolist()
+    
+    # Search Qdrant
+    results = qdrant_client.search(
+        collection_name=COLLECTION_NAME,
+        query_vector=query_embedding,
+        limit=top_k,
+        with_payload=True
+    )
+    
+    # Get full article details from PostgreSQL
+    output = []
+    session = Session()
+    try:
+        for hit in results:
+            article = session.query(Article).get(hit.payload["article_id"])
+            output.append({
+                "score": hit.score,
+                "text": hit.payload["chunk_text"],
+                "article_title": article.article_title,
+                "full_text": article.article_body,
+                "reference": f"{article.source}/{article.article_id}"
+            })
+    finally:
+        session.close()
+    
+    return output
 
 
 def main():
-    model = SentenceTransformer('BlackKakapo/stsb-xlm-r-multilingual-ro')
-
     print("Fetching all articles...")
     all_articles = get_all_articles()
+
+    print("Loading embedding model...")
+    model = SentenceTransformer('BlackKakapo/stsb-xlm-r-multilingual-ro')
+    
     for article in all_articles:
-        embeddings = get_embeddings(model, article.article_body)
-        print(embeddings.shape)
+        # Generate chunks and embeddings
+        chunks = get_chunks(model, article.article_body)  # Modified from get_embeddings
+        embeddings = model.encode(chunks)
+        
+        # Store in Qdrant
+        store_embeddings_qdrant(article, embeddings, chunks)
+        
+        print(f"Stored {len(embeddings)} chunks for article {article.id}")
 
 
 if __name__ == '__main__':
