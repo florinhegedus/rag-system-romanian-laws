@@ -39,3 +39,19 @@ start-persistent-services:  # Start the Minio and Postgres services
 stop-and-remove-postgres-db:  # Stop and remove the Postgres container and its data
 	docker-compose rm -s -v postgres
 	docker volume rm rag-system-romanian-laws_pg_data
+
+.PHONY: docker-nuke
+
+docker-nuke: confirm ## COMPLETELY remove all Docker artifacts
+	@echo "Stopping and removing all containers..."
+	docker-compose down --volumes --remove-orphans
+	@echo "Removing any remaining containers..."
+	docker rm -f $(shell docker ps -aq) 2>/dev/null || true
+	@echo "Removing project volumes..."
+	docker volume rm $(shell docker volume ls -q | grep -E 'minio_data|pg_data|qdrant_data') 2>/dev/null || true
+	@echo "Pruning networks..."
+	docker network prune -f
+	@echo "Cleanup complete!"
+
+confirm:
+	@echo -n "Are you sure you want to delete ALL Docker data? [y/N] " && read ans && [ $${ans:-N} = y ]
