@@ -114,9 +114,9 @@ def search_laws(query: str, model, top_k=5) -> List[Dict]:
     query_embedding = model.encode(query).tolist()
     
     # Search Qdrant
-    results = qdrant_client.search(
+    results = qdrant_client.query_points(
         collection_name=COLLECTION_NAME,
-        query_vector=query_embedding,
+        query=query_embedding,
         limit=top_k,
         with_payload=True
     )
@@ -125,8 +125,8 @@ def search_laws(query: str, model, top_k=5) -> List[Dict]:
     output = []
     session = Session()
     try:
-        for hit in results:
-            article = session.query(Article).get(hit.payload["article_id"])
+        for hit in results.points:
+            article = session.get(Article, hit.payload["article_id"])
             output.append({
                 "score": hit.score,
                 "text": hit.payload["chunk_text"],
@@ -173,6 +173,9 @@ def get_chunks(model, text: str, overlap_ratio=0.25) -> List[str]:
     for start in range(0, len(tokens), step):
         end = start + effective_window
         chunk_tokens = tokens[start:end]
+        # if the chunk is too small and it is contained in the previous chunk, break
+        if start != 0 and len(chunk_tokens) < overlap:
+            break
         chunks.append(tokenizer.decode(chunk_tokens, clean_up_tokenization_spaces=True))
     
     return chunks
@@ -186,6 +189,8 @@ def main():
     model = SentenceTransformer('BlackKakapo/stsb-xlm-r-multilingual-ro')
 
     setup_qdrant_collection()
+
+    # search_laws("Ce este casatoria", model)
     
     for article in all_articles:
         # Generate chunks and embeddings
@@ -193,7 +198,7 @@ def main():
         embeddings = model.encode(chunks)
         
         # Store in Qdrant
-        check_existence_and_store_embeddings_qdrant(article, embeddings, chunks)
+        store_embeddings_qdrant(article, embeddings, chunks)
 
 
 if __name__ == '__main__':

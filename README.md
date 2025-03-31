@@ -8,7 +8,7 @@ This repository contains a system for collecting, processing, and querying Roman
 ## Local Deployment
 1. Start persistent services:
 ```bash
-make start-persistent-services  # minio, postgres
+make start-persistent-services  # minio, postgres, qdrant
 ```
 2. Run on-demand components:
 ```bash
