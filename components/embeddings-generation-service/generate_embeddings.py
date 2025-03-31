@@ -2,44 +2,35 @@ from common.postgres_db import Session, Article
 from sentence_transformers import SentenceTransformer
 
 
-def get_embeddings(model, text):
+def get_embeddings(model, text, overlap_ratio=0.25):
     """
-    Generate embeddings for a list of sentences using the SentenceTransformer model.
+    Generate embeddings with sliding window and overlap
     
     Args:
-        sentences (list): A list of sentences to generate embeddings for.
+        model: SentenceTransformer model
+        text: Input text to process
+        overlap_ratio: How much to overlap the windows (e.g., 0.25 for 25% overlap)
     
     Returns:
-        list: A list of embeddings corresponding to the input sentences.
+        List of embeddings for each window
     """
     tokenizer = model.tokenizer
-    sentences = text.split('.')
-
-    chunks = [[]]
-    chunk_length = 0
-    for i, sentence in enumerate(sentences):
-        tokens = tokenizer(sentence, padding='longest', return_tensors="pt")
-        num_tokens = len(tokens['input_ids'][0]) - 2 # Subtracting 2 for [CLS] and [SEP] tokens
-        print(f"Sentence - number of tokens: {num_tokens}")
-        if num_tokens > model.max_seq_length:
-            print(f"Number of tokens ({num_tokens}) exceeds the maximum sequence length ({model.max_seq_length}).")
-            words = sentence.split(' ')
-            # TODO: append to curr_chunk and remaining to next chunks
-            raise ValueError(f"Sentence exceeds max length: {sentence}")
-        elif chunk_length + num_tokens + 2 < model.max_seq_length:
-            chunks[-1].append(sentence)
-            chunk_length += num_tokens
-        else:
-            chunks.append([sentence])
-            chunk_length = num_tokens
-
-    chunks = ['.'.join(chunk) for chunk in chunks]
-    print(f"Number of chunks: {len(chunks)}")
-
-    tokens = tokenizer(chunks, padding='longest', return_tensors="pt")
-    tokens.to(model.device)
-    embeddings = model(tokens)
-    return embeddings
+    tokens = tokenizer.encode(text, add_special_tokens=False)
+    context_size = model.max_seq_length
+    effective_window = context_size - tokenizer.num_special_tokens_to_add()
+    overlap = int(context_size * overlap_ratio)
+    step = effective_window - overlap
+    
+    chunks = []
+    for start in range(0, len(tokens), step):
+        end = start + effective_window
+        chunk_tokens = tokens[start:end]
+        
+        # Convert back to text (properly handles BPE/subword tokens)
+        chunk_text = tokenizer.decode(chunk_tokens, clean_up_tokenization_spaces=True)
+        chunks.append(chunk_text)
+    
+    return model.encode(chunks)
 
 
 def get_all_articles(source=None):
@@ -84,25 +75,13 @@ def print_article_details(article):
 
 
 def main():
-    # Example usage of sentence transformer
     model = SentenceTransformer('BlackKakapo/stsb-xlm-r-multilingual-ro')
-    text = "This is an example sentence. This is another example sentence."
-    embeddings = get_embeddings(model, text)
-    print(embeddings['input_ids'][0].shape)
 
     print("Fetching all articles...")
     all_articles = get_all_articles()
     for article in all_articles:
         embeddings = get_embeddings(model, article.article_body)
-        print(embeddings['input_ids'][0].shape)
-
-    # Get tokenizer
-
-    # Count tokens per article
-
-    # curr_chunk article
-
-    # Generate embeddings
+        print(embeddings.shape)
 
 
 if __name__ == '__main__':
