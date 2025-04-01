@@ -18,7 +18,7 @@ process-data:  # Extract, transform and load data into the database
 	docker-compose build process-data
 	docker-compose run --rm process-data
 
-train-model:  # Train the model
+fine-tune-model:  # Fine-tune model on legal data
 	docker-compose build train-model
 	docker-compose run --rm train-model
 

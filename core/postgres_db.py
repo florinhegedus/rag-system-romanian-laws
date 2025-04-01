@@ -1,23 +1,25 @@
 import os
+from dotenv import load_dotenv
 from sqlalchemy import create_engine, Column, String, Text, Integer, UniqueConstraint
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 
-# Set the endpoint URL based on the environment
-if os.getenv("ENVIRONMENT") == "local":
-    HOST = 'localhost'
-else:
-    HOST = 'postgres'
+# Load environment variables from .env file
+load_dotenv()
 
 
-# Define the database URL (replace with your actual database credentials)
-DATABASE_URL = f"postgresql+psycopg2://yourusername:yourpassword@{HOST}:5432/yourdatabase"
+# Set up the database connection parameters
+HOST = 'localhost' if os.getenv("ENVIRONMENT") == "local" else 'postgres'
+USERNAME = os.getenv("POSTGRES_USER", "default_username")
+PASSWORD = os.getenv("POSTGRES_PASSWORD", "default_password")
+DATABASE = os.getenv("POSTGRES_DB", "default_database")
+DATABASE_URL = f"postgresql+psycopg2://{USERNAME}:{PASSWORD}@{HOST}:5432/{DATABASE}"
 
 # Create the database engine
 engine = create_engine(DATABASE_URL)
 
-# Create a configured Session class
+# Create a configured "Session" class
 Session = sessionmaker(bind=engine)
 
 # Create a base class for declarative models
