@@ -1,5 +1,5 @@
 from bs4 import BeautifulSoup
-from core import MinIOClient, LegalDocEnum
+from core import MinIOClient, LegalDocsEnum
 from core.postgres_db import Session, Article
 
 
@@ -95,7 +95,7 @@ def main():
     bucket_name = "legal-docs-minio-bucket"
 
     # Process each legal document
-    for doc in LegalDocEnum:
+    for doc in LegalDocsEnum:
         save_legal_doc_to_postgres(doc.name, minio_client, bucket_name)
 
 

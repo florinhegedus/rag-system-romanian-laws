@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class LegalDocEnum(Enum):
+class LegalDocsEnum(Enum):
     CODUL_PENAL = "https://legislatie.just.ro/Public/DetaliiDocument/109855"
     CODUL_DE_PROCEDURA_PENALA = "https://legislatie.just.ro/Public/DetaliiDocument/120611"
     CODUL_CIVIL = "https://legislatie.just.ro/Public/DetaliiDocument/109884"

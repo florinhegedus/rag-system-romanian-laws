@@ -1,4 +1,4 @@
 from .minio_client import MinIOClient
-from .enums import LegalDocEnum
+from .legal_docs import LegalDocsEnum
 
-__all__ = ["MinIOClient", "LegalDocEnum"]
+__all__ = ["MinIOClient", "LegalDocsEnum"]

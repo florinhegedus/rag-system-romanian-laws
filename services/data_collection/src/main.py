@@ -1,5 +1,5 @@
 import requests
-from core import MinIOClient, LegalDocEnum
+from core import MinIOClient, LegalDocsEnum
 
 
 class SavingUtilities:
@@ -8,13 +8,13 @@ class SavingUtilities:
         Initializes the SavingUtilities class.
         """
         self.links = [
-            LegalDocEnum.CODUL_PENAL,
-            LegalDocEnum.CODUL_DE_PROCEDURA_PENALA,
-            LegalDocEnum.CODUL_CIVIL,
-            LegalDocEnum.CODUL_DE_PROCEDURA_CIVILA,
-            LegalDocEnum.CODUL_FISCAL,
-            LegalDocEnum.CODUL_DE_PROCEDURA_FISCALA,
-            LegalDocEnum.CODUL_MUNCII
+            LegalDocsEnum.CODUL_PENAL,
+            LegalDocsEnum.CODUL_DE_PROCEDURA_PENALA,
+            LegalDocsEnum.CODUL_CIVIL,
+            LegalDocsEnum.CODUL_DE_PROCEDURA_CIVILA,
+            LegalDocsEnum.CODUL_FISCAL,
+            LegalDocsEnum.CODUL_DE_PROCEDURA_FISCALA,
+            LegalDocsEnum.CODUL_MUNCII
         ]
         self.minio_client = MinIOClient()
         self.bucket_name = "legal-docs-minio-bucket"
