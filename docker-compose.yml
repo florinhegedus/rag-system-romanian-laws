@@ -51,7 +51,7 @@ services:
     ports:
       - "3000:80"
     depends_on:
-      - backend
+      - legal-search-api
 
   # On-demand Services (run with docker-compose run)
   collect-data:
