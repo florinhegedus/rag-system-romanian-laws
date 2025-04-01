@@ -29,11 +29,11 @@ generate-embeddings:  # Generate embeddings for legal documents
 # --- Frontend and backend ---
 start-backend:  # Start legal search API
 	docker-compose build legal-search-api
-	docker-compose run --rm legal-search-api
+	docker-compose up legal-search-api
 
 start-frontend:  # Start frontend
 	docker-compose build react-frontend
-	docker-compose run --rm react-frontend
+	docker-compose up react-frontend
 	
 # --- Infrastructure ---
 docker-stop-containers:  # Stop all running containers

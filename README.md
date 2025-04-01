@@ -4,6 +4,8 @@ This repository contains a system for collecting, processing, and querying Roman
 
 ![Architecture](static/rolaw.jpg)
 
+## Prerequisites
+`Docker` and `CMake` installed.
 
 ## Local Deployment
 1. Start persistent services:
@@ -18,7 +20,13 @@ make generate-embeddings  # Query Postgres, embed and save laws to Qdrant
 ```
 3. Start FastAPI backend and React frontend:
 ```bash
-
+make start-backend
+make start-frontend
+```
+4. Test backend:
+```bash
+curl -X POST "http://localhost:8000/query" -H "Content-Type: application/json" -d '{"question": "ce se poate intampla daca fac evaziune fiscala", "top_k": 3}'
+```
 
 Clear all data:
 ```bash
