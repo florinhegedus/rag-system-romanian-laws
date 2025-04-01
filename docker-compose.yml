@@ -72,14 +72,14 @@ services:
       - minio
       - postgres
 
-  model-training:
+  train-model:
     build: ./components/component3
     env_file: .env
     depends_on:
       - postgres
       - mlflow
 
-  embeddings-generation:
+  generate-embeddings:
     build: 
       context: ./
       dockerfile: ./services/embeddings_generation/Dockerfile

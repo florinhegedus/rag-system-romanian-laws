@@ -23,8 +23,8 @@ train-model:  # Train the model
 	docker-compose run --rm train-model
 
 generate-embeddings:  # Generate embeddings for legal documents
-	docker-compose build embeddings-generation
-	docker-compose run --rm embeddings-generation
+	docker-compose build generate-embeddings
+	docker-compose run --rm generate-embeddings
 	
 # --- Infrastructure ---
 docker-stop-containers:  # Stop all running containers
