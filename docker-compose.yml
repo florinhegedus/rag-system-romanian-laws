@@ -92,3 +92,4 @@ volumes:
   minio_data:
   pg_data:
   qdrant_data:
+  mlflow_artifacts:
