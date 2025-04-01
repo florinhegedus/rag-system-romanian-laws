@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
-from common import MinIOClient, LegalDocEnum
-from common.postgres_db import Session, Article
+from core import MinIOClient, LegalDocEnum
+from core.postgres_db import Session, Article
 
 
 def save_legal_doc_to_postgres(document_name, minio_client, bucket_name):

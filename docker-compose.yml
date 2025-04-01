@@ -57,16 +57,16 @@ services:
   # On-demand Services (run with docker-compose run)
   collect-data:
     build: 
-      context: ./components/
-      dockerfile: ./collect-data-service/Dockerfile
+      context: ./
+      dockerfile: ./services/data_collection/Dockerfile
     env_file: .env
     depends_on:
       - minio
 
-  etl:
+  process-data:
     build: 
-      context: ./components/
-      dockerfile: ./etl-service/Dockerfile
+      context: ./
+      dockerfile: ./services/data_processing/Dockerfile
     env_file: .env
     depends_on:
       - minio
@@ -80,15 +80,15 @@ services:
       - mlflow
 
   embeddings-generation:
-    build: ./components/component4
+    build: 
+      context: ./
+      dockerfile: ./services/embeddings_generation/Dockerfile
     env_file: .env
     depends_on:
       - postgres
       - qdrant
-      - mlflow
 
 volumes:
   minio_data:
   pg_data:
-  mlflow_artifacts:
   qdrant_data:

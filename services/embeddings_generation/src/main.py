@@ -4,7 +4,7 @@ from sentence_transformers import SentenceTransformer
 from qdrant_client import QdrantClient
 from qdrant_client.http import models
 from typing import List, Dict
-from common.postgres_db import Session, Article
+from core.postgres_db import Session, Article
 
 
 # Initialize Qdrant client

@@ -14,9 +14,9 @@ collect-data:  # Collect raw legal data from online sources
 	docker-compose build collect-data
 	docker-compose run --rm collect-data
 
-etl:  # Extract, transform and load data into the database
-	docker-compose build etl
-	docker-compose run --rm etl
+process-data:  # Extract, transform and load data into the database
+	docker-compose build process-data
+	docker-compose run --rm process-data
 
 train-model:  # Train the model
 	docker-compose build train-model

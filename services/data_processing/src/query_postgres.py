@@ -1,4 +1,4 @@
-from common.postgres_db import Session, Article
+from core.postgres_db import Session, Article
 
 
 def get_article_by_id(source, article_id):

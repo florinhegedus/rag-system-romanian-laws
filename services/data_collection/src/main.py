@@ -1,5 +1,5 @@
 import requests
-from common import MinIOClient, LegalDocEnum
+from core import MinIOClient, LegalDocEnum
 
 
 class SavingUtilities:
