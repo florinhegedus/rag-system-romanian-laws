@@ -35,14 +35,16 @@ services:
     volumes:
       - qdrant_data:/qdrant/storage
 
-  backend:
-    build: ./components/backend-service
+  legal-search-api:
+    build: 
+      context: ./
+      dockerfile: ./services/legal_search_api/Dockerfile
     env_file: .env
     ports:
       - "8000:8000"
     depends_on:
       - qdrant
-      - mlflow
+      - postgres
 
   frontend-app:
     build: ./components/frontend-app

@@ -25,6 +25,10 @@ fine-tune-model:  # Fine-tune model on legal data
 generate-embeddings:  # Generate embeddings for legal documents
 	docker-compose build generate-embeddings
 	docker-compose run --rm generate-embeddings
+
+start-fastapi-backend:  # Start legal search API
+	docker-compose build generate-embeddings
+	docker-compose run --rm generate-embeddings
 	
 # --- Infrastructure ---
 docker-stop-containers:  # Stop all running containers
