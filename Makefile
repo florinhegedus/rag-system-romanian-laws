@@ -26,9 +26,14 @@ generate-embeddings:  # Generate embeddings for legal documents
 	docker-compose build generate-embeddings
 	docker-compose run --rm generate-embeddings
 
-start-fastapi-backend:  # Start legal search API
-	docker-compose build generate-embeddings
-	docker-compose run --rm generate-embeddings
+# --- Frontend and backend ---
+start-backend:  # Start legal search API
+	docker-compose build legal-search-api
+	docker-compose run --rm legal-search-api
+
+start-frontend:  # Start frontend
+	docker-compose build react-frontend
+	docker-compose run --rm react-frontend
 	
 # --- Infrastructure ---
 docker-stop-containers:  # Stop all running containers

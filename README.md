@@ -14,7 +14,11 @@ make start-persistent-services  # minio, postgres, qdrant
 ```bash
 make collect-data  # Collect data to MinIO bucket
 make process-data  # Save legal articles to Postgres
+make generate-embeddings  # Query Postgres, embed and save laws to Qdrant
 ```
+3. Start FastAPI backend and React frontend:
+```bash
+
 
 Clear all data:
 ```bash
