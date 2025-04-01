@@ -1,6 +1,6 @@
-beautifulsoup4
-lxml
-boto3
-sqlalchemy
-psycopg2-binary
-python-dotenv
+beautifulsoup4==4.13.3
+lxml==5.3.1
+boto3==1.37.24
+SQLAlchemy==2.0.40
+psycopg2-binary==2.9.10
+python-dotenv==1.1.0

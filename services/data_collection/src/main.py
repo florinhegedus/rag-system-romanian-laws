@@ -1,5 +1,6 @@
 import requests
-from core import MinIOClient, LegalDocsEnum
+from core.minio_client import MinIOClient
+from core.legal_docs import LegalDocsEnum
 
 
 class SavingUtilities:

@@ -1,7 +1,7 @@
-requests
-boto3
-sqlalchemy
-psycopg2-binary
-python-dotenv
-sentence-transformers
-qdrant-client
+requests==2.32.3
+boto3==1.37.24
+python-dotenv==1.1.0
+SQLAlchemy==2.0.40
+psycopg2-binary==2.9.10
+sentence-transformers==4.0.1
+qdrant-client==1.13.3
