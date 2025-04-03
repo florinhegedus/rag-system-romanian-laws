@@ -4,23 +4,26 @@ from pydantic import BaseModel
 from typing import List, AsyncGenerator
 from contextlib import asynccontextmanager
 from sentence_transformers import SentenceTransformer
-from transformers import pipeline
-import asyncio
 from core.qdrant_db import search_laws
+from openai import OpenAI
+from dotenv import load_dotenv
+import os
 
-# Configuration
+
+# Load environment variables from .env file
+load_dotenv()
+
+
+DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
 EMBEDDING_MODEL = "BlackKakapo/stsb-xlm-r-multilingual-ro"
-LLM_MODEL = "teapotai/teapotllm"
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     # Load models during startup
     app.state.embedder = SentenceTransformer(EMBEDDING_MODEL)
-    app.state.generator = pipeline(
-        "text2text-generation",
-        LLM_MODEL
-    )
-    print(f"Loaded models: {EMBEDDING_MODEL} and {LLM_MODEL}")
+    app.state.generator = OpenAI(api_key=DEEPSEEK_API_KEY, base_url="https://api.deepseek.com")
+    print(f"Loaded embeded model: {EMBEDDING_MODEL}")
     yield
 
 app = FastAPI(
@@ -50,20 +53,23 @@ class QAResponse(BaseModel):
     answer: str
     context: List[LawResult]
 
-def format_prompt(question: str, laws: List[LawResult]) -> str:
+def format_prompt(question: str, laws: List[LawResult]) -> List[dict]:
     context = "\n\n".join(
-        f"Legea ({law["reference"]}):\n{law["text"]}\n\n"
+        f"Legea ({law['reference']}):\n{law['text']}\n\n"
         for law in laws
     )
-    return f"""Răspunde la întrebarea juridică folosind exclusiv informațiile din textele de lege oferite. 
-            Dacă informațiile sunt insuficiente, răspunde că nu poți oferi un răspuns sigur bazat pe legislația actuală.
+    
+    return [
+        {
+            "role": "system",
+            "content": "Răspunde la întrebarea juridică folosind exclusiv informațiile din textele de lege oferite. Dacă informațiile sunt insuficiente, răspunde că nu poți oferi un răspuns sigur bazat pe legislația actuală."
+        },
+        {
+            "role": "user",
+            "content": f"ÎNTREBARE: {question}\n\nTEXTE LEGALE RELEVANTE:\n{context}\n\nRĂSPUNS:"
+        }
+    ]
 
-            ÎNTREBARE: {question}
-
-            TEXTE LEGALE RELEVANTE:
-            {context}
-
-            RĂSPUNS:"""
 
 @app.post("/ask", response_model=QAResponse)
 async def generate_answer(request: Request, query: QueryRequest):
@@ -78,12 +84,14 @@ async def generate_answer(request: Request, query: QueryRequest):
     prompt = format_prompt(query.question, laws)
 
     print("Asking LLM...")
-    
-    # Run LLM generation in thread pool
-    answer = app.state.generator(prompt)
+    answer = app.state.generator.chat.completions.create(
+        model="deepseek-chat",
+        messages=prompt,
+        stream=False
+    )
     
     return QAResponse(
-        answer=answer,
+        answer=answer.choices[0].message.content,
         context=laws
     )
 

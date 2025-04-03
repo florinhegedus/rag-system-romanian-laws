@@ -7,4 +7,4 @@ SQLAlchemy==2.0.40
 psycopg2-binary==2.9.10
 sentence-transformers==4.0.1
 qdrant-client==1.13.3
-sentencpiece==0.2.0
+openai==1.70.0
