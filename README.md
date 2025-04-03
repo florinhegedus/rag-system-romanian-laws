@@ -25,7 +25,7 @@ make start-frontend
 ```
 4. Test backend:
 ```bash
-curl -X POST "http://localhost:8000/query" -H "Content-Type: application/json" -d '{"question": "ce se poate intampla daca fac evaziune fiscala", "top_k": 3}'
+curl -X POST "http://localhost:8000/ask" -H "Content-Type: application/json" -d '{"question": "ce se poate intampla daca fac evaziune fiscala", "top_k": 3}'
 ```
 
 Clear all data:

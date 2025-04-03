@@ -46,8 +46,10 @@ services:
       - qdrant
       - postgres
 
-  frontend-app:
-    build: ./components/frontend-app
+  react-frontend:
+    build: 
+      context: ./
+      dockerfile: ./services/legal_search_api/Dockerfile
     ports:
       - "3000:80"
     depends_on:

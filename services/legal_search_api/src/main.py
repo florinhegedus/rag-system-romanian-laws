@@ -4,31 +4,30 @@ from pydantic import BaseModel
 from typing import List, AsyncGenerator
 from contextlib import asynccontextmanager
 from sentence_transformers import SentenceTransformer
+from transformers import pipeline
+import asyncio
 from core.qdrant_db import search_laws
 
-
-# Load embedding model early to catch errors
-MODEL_NAME = "BlackKakapo/stsb-xlm-r-multilingual-ro"
-
+# Configuration
+EMBEDDING_MODEL = "BlackKakapo/stsb-xlm-r-multilingual-ro"
+LLM_MODEL = "teapotai/teapotllm"
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
-    # Startup code
-    app.state.model = SentenceTransformer(MODEL_NAME)
-    print(f"Loaded embedding model: {MODEL_NAME}")
+    # Load models during startup
+    app.state.embedder = SentenceTransformer(EMBEDDING_MODEL)
+    app.state.generator = pipeline(
+        "text2text-generation",
+        LLM_MODEL
+    )
+    print(f"Loaded models: {EMBEDDING_MODEL} and {LLM_MODEL}")
     yield
-    # Shutdown code (optional)
-    # If you need to clean up resources
-    
 
-# Initialize FastAPI with lifespan
 app = FastAPI(
-    title="Legal Semantic Search API",
+    title="Legal QA System",
     lifespan=lifespan
 )
 
-
-# Configure CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -36,12 +35,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-# Request/Response models remain the same
 class QueryRequest(BaseModel):
     question: str
     top_k: int = 5
-
 
 class LawResult(BaseModel):
     score: float
@@ -50,20 +46,56 @@ class LawResult(BaseModel):
     full_text: str
     reference: str
 
+class QAResponse(BaseModel):
+    answer: str
+    context: List[LawResult]
+
+def format_prompt(question: str, laws: List[LawResult]) -> str:
+    context = "\n\n".join(
+        f"Legea ({law["reference"]}):\n{law["text"]}\n\n"
+        for law in laws
+    )
+    return f"""Răspunde la întrebarea juridică folosind exclusiv informațiile din textele de lege oferite. 
+            Dacă informațiile sunt insuficiente, răspunde că nu poți oferi un răspuns sigur bazat pe legislația actuală.
+
+            ÎNTREBARE: {question}
+
+            TEXTE LEGALE RELEVANTE:
+            {context}
+
+            RĂSPUNS:"""
+
+@app.post("/ask", response_model=QAResponse)
+async def generate_answer(request: Request, query: QueryRequest):
+    # Retrieve relevant laws
+    laws = search_laws(
+        query.question,
+        request.app.state.embedder,
+        query.top_k
+    )
+    
+    # Generate LLM prompt
+    prompt = format_prompt(query.question, laws)
+
+    print("Asking LLM...")
+    
+    # Run LLM generation in thread pool
+    answer = app.state.generator(prompt)
+    
+    return QAResponse(
+        answer=answer,
+        context=laws
+    )
 
 @app.post("/query", response_model=List[LawResult])
 async def query_laws(request: Request, query_request: QueryRequest):
-    """
-    Endpoint to search relevant laws based on a natural language question
-    
-    Parameters:
-    - question: The legal question to analyze
-    - top_k: Number of most relevant results to return (default:5)
-    """
-    model = request.app.state.model
-    results = search_laws(query_request.question, model, query_request.top_k)
+    """Original semantic search endpoint"""
+    results = search_laws(
+        query_request.question,
+        request.app.state.embedder,
+        query_request.top_k
+    )
     return results
-
 
 if __name__ == "__main__":
     import uvicorn
