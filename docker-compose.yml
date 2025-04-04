@@ -46,10 +46,10 @@ services:
       - qdrant
       - postgres
 
-  react-frontend:
+  frontend:
     build: 
       context: ./
-      dockerfile: ./services/legal_search_api/Dockerfile
+      dockerfile: ./services/frontend/Dockerfile
     ports:
       - "3000:80"
     depends_on:
@@ -73,12 +73,12 @@ services:
       - minio
       - postgres
 
-  train-model:
-    build: ./components/component3
-    env_file: .env
-    depends_on:
-      - postgres
-      - mlflow
+  # train-model:
+  #   build: ./components/component3
+  #   env_file: .env
+  #   depends_on:
+  #     - postgres
+  #     - mlflow
 
   generate-embeddings:
     build: 
