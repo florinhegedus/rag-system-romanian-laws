@@ -32,8 +32,8 @@ start-backend:  # Start legal search API
 	docker-compose up -d legal-search-api
 
 start-frontend:  # Start frontend
-	docker-compose build react-frontend
-	docker-compose up -d react-frontend
+	docker-compose build frontend
+	docker-compose up -d frontend
 	
 # --- Infrastructure ---
 docker-stop-containers:  # Stop all running containers

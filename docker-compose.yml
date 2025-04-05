@@ -19,14 +19,6 @@ services:
     ports:
       - "5432:5432"
 
-  mlflow:
-    image: mlflow/mlflow
-    env_file: .env
-    volumes:
-      - mlflow_artifacts:/mlflow
-    ports:
-      - "5000:5000"
-
   qdrant:
     image: qdrant/qdrant
     ports:
@@ -72,13 +64,6 @@ services:
     depends_on:
       - minio
       - postgres
-
-  # train-model:
-  #   build: ./components/component3
-  #   env_file: .env
-  #   depends_on:
-  #     - postgres
-  #     - mlflow
 
   generate-embeddings:
     build: 
