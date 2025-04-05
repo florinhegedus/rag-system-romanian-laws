@@ -32,3 +32,6 @@ Clear all data:
 ```bash
 make docker-nuke
 ```
+
+## Web App
+![webapp](static/webapp.jpg)
