@@ -33,7 +33,6 @@ class MinIOClient:
         """
         try:
             self.client.head_bucket(Bucket=bucket_name)
-            print(f"Bucket '{bucket_name}' already exists.")
         except self.client.exceptions.ClientError:
             self.client.create_bucket(Bucket=bucket_name)
             print(f"Bucket '{bucket_name}' created.")

@@ -1,6 +1,6 @@
 # Romanian Laws RAG
 
-This repository contains a system for collecting, processing, and querying Romanian laws. The system includes various components for data collection, ETL (Extract, Transform, Load) processes, and a backend service for querying the processed data. The architecture is designed to be modular and scalable, leveraging Docker for containerization and PostgreSQL for data storage.
+This repository contains a system for collecting, processing, and querying Romanian laws. The system includes various components for data collection and processing, an API for getting legal information and LLM responses and a frontend application. The architecture is designed to be modular and scalable, leveraging Docker for containerization.
 
 ![Architecture](static/rolaw.jpg)
 
@@ -25,7 +25,8 @@ make start-frontend
 ```
 4. Test backend:
 ```bash
-curl -X POST "http://localhost:8000/ask" -H "Content-Type: application/json" -d '{"question": "ce se poate intampla daca fac evaziune fiscala", "top_k": 3}'
+curl -X POST "http://localhost:8000/query" -H "Content-Type: application/json" -d '{"question": "ce se poate intampla daca fac evaziune fiscala", "top_k": 3}'  # get relevant laws
+curl -X POST "http://localhost:8000/ask" -H "Content-Type: application/json" -d '{"question": "ce se poate intampla daca fac evaziune fiscala", "top_k": 3}'  # get llm response interpreting the laws
 ```
 
 Clear all data:

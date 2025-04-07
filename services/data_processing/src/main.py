@@ -4,16 +4,16 @@ from core.legal_docs import LegalDocsEnum
 from core.postgres_db import Session, Article
 
 
-def save_legal_doc_to_postgres(document_name, minio_client, bucket_name):
+def save_legal_doc_to_postgres(document: LegalDocsEnum, minio_client: MinIOClient, bucket_name: str):
     """
     Fetches the legal document from MinIO, parses it, and saves the articles to PostgreSQL.
 
-    :param document_name: Name of the document (e.g., "CODUL_PENAL").
+    :param document: Document enum representing the legal document.
     :param minio_client: An instance of the MinIOClient class.
     :param bucket_name: Name of the MinIO bucket where the document is stored.
     """
     # Fetch the HTML content from MinIO
-    object_name = f"{document_name}.html"
+    object_name = f"{document.name}.html"
     content = minio_client.get_object(bucket_name, object_name)
 
     if not content:
@@ -31,7 +31,7 @@ def save_legal_doc_to_postgres(document_name, minio_client, bucket_name):
     session = Session()
     try:
         for article in articles:
-            source = document_name
+            source = document.name
             article_id = article.attrs['id']
             article_title = article.contents[1].text
             article_body = article.contents[3].text
@@ -39,6 +39,7 @@ def save_legal_doc_to_postgres(document_name, minio_client, bucket_name):
             title = None
             chapter = None
             section = None
+            link = document.value + '#' + article_id
 
             # Traverse parents to find chapter and section
             for parent in article.parents:
@@ -68,6 +69,7 @@ def save_legal_doc_to_postgres(document_name, minio_client, bucket_name):
                 existing_article.title = title
                 existing_article.chapter = chapter
                 existing_article.section = section
+                existing_article.link = link
             else:
                 # Create a new Article object
                 new_article = Article(
@@ -78,14 +80,15 @@ def save_legal_doc_to_postgres(document_name, minio_client, bucket_name):
                     part=part,
                     title=title,
                     chapter=chapter,
-                    section=section
+                    section=section,
+                    link=link
                 )
                 # Add the new article to the session
                 session.add(new_article)
 
         # Commit the session to save the articles to the database
         session.commit()
-        print(f"{document_name} - Scraping and saving to database terminated successfully.")
+        print(f"{document.name} - Scraping and saving to database terminated successfully.")
     finally:
         session.close()
 
@@ -97,7 +100,7 @@ def main():
 
     # Process each legal document
     for doc in LegalDocsEnum:
-        save_legal_doc_to_postgres(doc.name, minio_client, bucket_name)
+        save_legal_doc_to_postgres(doc, minio_client, bucket_name)
 
 
 if __name__ == '__main__':

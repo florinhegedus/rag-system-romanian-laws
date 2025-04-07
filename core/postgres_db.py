@@ -34,9 +34,10 @@ class Article(Base):
     article_title = Column(String, nullable=False)
     article_body = Column(Text, nullable=False)
     part = Column(String)
-    title = Column(String)
+    title = Column(String)  # title the article belongs to (not the title of the article itself)
     chapter = Column(String)
     section = Column(String)
+    link = Column(String)
 
     __table_args__ = (UniqueConstraint('source', 'article_id', name='_source_article_id_uc'),)
 

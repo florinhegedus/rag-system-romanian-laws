@@ -18,29 +18,29 @@ process-data:  # Extract, transform and load data into the database
 	docker-compose build process-data
 	docker-compose run --rm process-data
 
-fine-tune-model:  # Fine-tune model on legal data
-	docker-compose build train-model
-	docker-compose run --rm train-model
-
 generate-embeddings:  # Generate embeddings for legal documents
 	docker-compose build generate-embeddings
 	docker-compose run --rm generate-embeddings
+
+run-on-demand-services: collect-data process-data generate-embeddings  # Run all on-demand services in sequence
+
 
 # --- Frontend and backend ---
 start-backend:  # Start legal search API
 	docker-compose build legal-search-api
 	docker-compose up -d legal-search-api
 
+stop-backend:  # Stop legal search API
+	docker-compose stop legal-search-api
+
 start-frontend:  # Start frontend
 	docker-compose build frontend
 	docker-compose up -d frontend
-
-stop-backend:  # Stop legal search API
-	docker-compose stop legal-search-api
 	
 stop-frontend:  # Stop frontend
 	docker-compose stop frontend
 	
+
 # --- Infrastructure ---
 docker-stop-containers:  # Stop all running containers
 	docker compose stop

@@ -47,6 +47,7 @@ class LawResult(BaseModel):
     text: str
     article_title: str
     full_text: str
+    link: str
     reference: str
 
 class QAResponse(BaseModel):
@@ -55,7 +56,7 @@ class QAResponse(BaseModel):
 
 def format_prompt(question: str, laws: List[LawResult]) -> List[dict]:
     context = "\n\n".join(
-        f"Legea ({law['reference']}):\n{law['text']}\n\n"
+        f"Legea {law['reference']}:\nLink: {law['link']}\n{law['text']}\n\n"
         for law in laws
     )
     

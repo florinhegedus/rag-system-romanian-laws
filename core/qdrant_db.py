@@ -65,7 +65,7 @@ def store_embeddings_qdrant(article: Article, embeddings: List, chunks: List[str
         collection_name=COLLECTION_NAME,
         points=points
     )
-    print(f"Stored {len(embeddings)} chunks for article {article.id}")
+    print(f"Stored {len(embeddings)} chunks for article {article.source} / {article.article_title}")
 
 
 def check_existence_and_store_embeddings_qdrant(article: Article, embeddings: List, chunks: List[str]):
@@ -106,7 +106,7 @@ def check_existence_and_store_embeddings_qdrant(article: Article, embeddings: Li
             collection_name=COLLECTION_NAME,
             points=points
         )
-        print(f"Stored {len(embeddings)} chunks for article {article.id}")
+        print(f"Stored {len(embeddings)} chunks for article {article.source} / {article.article_title}")
 
 
 def search_laws(query: str, model, top_k=5) -> List[Dict]:
@@ -133,7 +133,8 @@ def search_laws(query: str, model, top_k=5) -> List[Dict]:
                 "text": hit.payload["chunk_text"],
                 "article_title": article.article_title,
                 "full_text": article.article_body,
-                "reference": f"{article.source}/{article.article_id}"
+                "link": article.link,
+                "reference": f"{article.article_title} din {article.source}",
             })
     finally:
         session.close()

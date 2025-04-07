@@ -55,6 +55,7 @@ def print_article_details(article):
         print(f"Title (Group): {article.title}")
         print(f"Chapter: {article.chapter}")
         print(f"Section: {article.section}")
+        print(f"Link: {article.link}")
         print("-" * 40)
     else:
         print("Article not found.")
