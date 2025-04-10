@@ -17,59 +17,84 @@
   border-radius: 8px;
 }
   
-  .message {
-    margin-bottom: 15px;
-    display: flex;
-  }
-  
-  .message.user {
-    justify-content: flex-end;
-  }
-  
-  .message.bot {
-    justify-content: flex-start;
-  }
-  
-  .content {
-    max-width: 70%;
-    padding: 10px 15px;
-    border-radius: 15px;
-    word-break: break-word;
-  }
-  
-  .message.user .content {
-    background-color: #007bff;
-    color: white;
-  }
-  
-  .message.bot .content {
-    background-color: #e9ecef;
-    color: black;
-  }
-  
-  .inputForm {
-    display: flex;
-    gap: 10px;
-  }
-  
-  .inputForm input {
-    flex: 1;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 16px;
-  }
-  
-  .inputForm button {
-    padding: 10px 20px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  
-  .inputForm button:disabled {
-    background-color: #6c757d;
-    cursor: not-allowed;
-  }
+.message {
+  margin-bottom: 15px;
+  display: flex;
+}
+
+.message.user {
+  justify-content: flex-end;
+}
+
+.message.bot {
+  justify-content: flex-start;
+}
+
+.content {
+  max-width: 70%;
+  padding: 10px 15px;
+  border-radius: 15px;
+  word-break: break-word;
+}
+
+.message.user .content {
+  background-color: #007bff;
+  color: white;
+}
+
+.message.bot .content {
+  background-color: #e9ecef;
+  color: black;
+}
+
+.inputForm {
+  display: flex;
+  gap: 10px;
+}
+
+.inputForm input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.inputForm button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.inputForm button:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+.content {
+  max-width: 70%;
+  padding: 10px 15px;
+  border-radius: 15px;
+  word-break: break-word;
+}
+
+.content a {
+  color: #007bff;
+  text-decoration: underline;
+}
+
+.content a:hover {
+  color: #0056b3;
+}
+
+.message.user .content a {
+  color: #cce5ff;
+  text-decoration: underline;
+}
+
+.message.user .content a:hover {
+  color: #99caff;
+}

@@ -12,13 +12,14 @@ This repository contains a system for collecting, processing, and querying Roman
 ```bash
 make start-persistent-services  # minio, postgres, qdrant
 ```
-2. Run on-demand components:
+2. Run on-demand services:
+- collect data and save to S3 compatible bucket
+- extract laws and save to postgres db
+- generate embeddings for the laws and save them to qdrant db:
 ```bash
-make collect-data  # Collect data to MinIO bucket
-make process-data  # Save legal articles to Postgres
-make generate-embeddings  # Query Postgres, embed and save laws to Qdrant
+make run-on-demand-services
 ```
-3. Start FastAPI backend and React frontend:
+3. Start FastAPI backend and NextJS frontend:
 ```bash
 make start-backend
 make start-frontend
@@ -35,4 +36,5 @@ make docker-nuke
 ```
 
 ## Web App
-![webapp](static/webapp.jpg)
+After starting the backend API and the frontend, you can access the frontend at `localhost:3000`. The LLM responds based on retrieved laws and displays links that point directly to the specific law.
+![webapp](static/webapp.png)

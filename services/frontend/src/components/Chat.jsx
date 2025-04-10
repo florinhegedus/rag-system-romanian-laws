@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 import styles from '../styles/Chat.module.css';
 
 const Chat = () => {
@@ -56,7 +57,20 @@ const Chat = () => {
         {messages.map((msg, index) => (
           <div key={index} className={`${styles.message} ${msg.isBot ? styles.bot : styles.user}`}>
             <div className={styles.content}>
-              {msg.content}
+              <ReactMarkdown
+                components={{
+                  a: ({ node, ...props }) => (
+                    <a 
+                      {...props} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className={styles.link}
+                    />
+                  )
+                }}
+              >
+                {msg.content}
+              </ReactMarkdown>
             </div>
           </div>
         ))}

@@ -63,7 +63,10 @@ def format_prompt(question: str, laws: List[LawResult]) -> List[dict]:
     return [
         {
             "role": "system",
-            "content": "Răspunde la întrebarea juridică folosind exclusiv informațiile din textele de lege oferite. Dacă informațiile sunt insuficiente, răspunde că nu poți oferi un răspuns sigur bazat pe legislația actuală."
+            "content": "Răspunde la întrebarea juridică folosind exclusiv informațiile din textele de lege oferite. " + \
+            "Dacă informațiile sunt insuficiente, răspunde că nu poți oferi un răspuns sigur bazat pe legislația actuală." + \
+            "În răspunsul tău, include link-uri către textele de lege relevante pentru a permite utilizatorului să verifice informațiile. " + \
+            "Răspunsul tău trebuie să fie concis și la obiect. "
         },
         {
             "role": "user",
